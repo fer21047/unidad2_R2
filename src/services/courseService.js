@@ -53,5 +53,20 @@ export const courseService = {
   } catch (error) {
     return { success: false, error: error.message };
   }
+},
+// Editar curso
+updateCourse: async (id, course) => {
+  try {
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(course)
+    });
+    const data = await res.json();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }
+
 };
