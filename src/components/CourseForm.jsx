@@ -13,6 +13,7 @@ const CourseForm = ({ onCourseCreated }) => {
     is_active: true
   });
 
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // success | error
@@ -23,13 +24,36 @@ const CourseForm = ({ onCourseCreated }) => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    setErrors(prev => ({ ...prev, [name]: '' })); // limpia error al cambiar
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.title.trim()) newErrors.title = 'El título es obligatorio';
+    if (!formData.description.trim()) newErrors.description = 'La descripción es obligatoria';
+    if (!formData.instructor.trim()) newErrors.instructor = 'El instructor es obligatorio';
+    if (!formData.category.trim()) newErrors.category = 'La categoría es obligatoria';
+    if (!formData.duration) newErrors.duration = 'La duración es obligatoria';
+    else if (isNaN(formData.duration) || parseInt(formData.duration) <= 0)
+      newErrors.duration = 'La duración debe ser un número positivo';
+    if (!formData.price) newErrors.price = 'El precio es obligatorio';
+    else if (isNaN(formData.price) || parseFloat(formData.price) < 0)
+      newErrors.price = 'El precio debe ser un número válido';
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage('');
     setMessageType('');
+
+    if (!validate()) return;
+
+    setLoading(true);
 
     try {
       const result = await courseService.createCourse({
@@ -50,6 +74,7 @@ const CourseForm = ({ onCourseCreated }) => {
           category: '',
           is_active: true
         });
+        setErrors({});
         if (onCourseCreated) onCourseCreated();
       } else {
         setMessage('Error al crear el curso: ' + result.error);
@@ -81,8 +106,8 @@ const CourseForm = ({ onCourseCreated }) => {
             value={formData.title} 
             onChange={handleChange} 
             placeholder="Introduce el título del curso" 
-            required 
           />
+          {errors.title && <span className="error">{errors.title}</span>}
         </div>
         
         {/* Descripción */}
@@ -94,8 +119,8 @@ const CourseForm = ({ onCourseCreated }) => {
             value={formData.description} 
             onChange={handleChange} 
             placeholder="Describe el contenido y los objetivos del curso" 
-            required 
           />
+          {errors.description && <span className="error">{errors.description}</span>}
         </div>
         
         <div className="form-row">
@@ -109,8 +134,8 @@ const CourseForm = ({ onCourseCreated }) => {
               value={formData.instructor} 
               onChange={handleChange} 
               placeholder="Nombre del instructor" 
-              required 
             />
+            {errors.instructor && <span className="error">{errors.instructor}</span>}
           </div>
           
           {/* Categoría */}
@@ -123,8 +148,8 @@ const CourseForm = ({ onCourseCreated }) => {
               value={formData.category} 
               onChange={handleChange} 
               placeholder="Categoría del curso" 
-              required 
             />
+            {errors.category && <span className="error">{errors.category}</span>}
           </div>
         </div>
         
@@ -139,8 +164,8 @@ const CourseForm = ({ onCourseCreated }) => {
               value={formData.duration} 
               onChange={handleChange} 
               placeholder="Ej: 20" 
-              required 
             />
+            {errors.duration && <span className="error">{errors.duration}</span>}
           </div>
           
           {/* Precio */}
@@ -153,8 +178,8 @@ const CourseForm = ({ onCourseCreated }) => {
               value={formData.price} 
               onChange={handleChange} 
               placeholder="Ej: 49.99" 
-              required 
             />
+            {errors.price && <span className="error">{errors.price}</span>}
           </div>
         </div>
         
@@ -177,7 +202,7 @@ const CourseForm = ({ onCourseCreated }) => {
           {loading ? 'Creando...' : 'Crear Curso'}
         </button>
         
-        {/* Mensaje */}
+        {/* Mensaje general */}
         {message && (
           <p className={`message ${messageType}`}>
             {message}
