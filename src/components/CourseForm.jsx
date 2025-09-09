@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { courseService } from '../services/courseService';
 import './CourseForm.css'
 
-const CourseForm = ({ onCourseCreated }) => {
+const CourseForm = ({ courseToEdit, onCourseSaved }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -18,18 +18,35 @@ const CourseForm = ({ onCourseCreated }) => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // success | error
 
+  // Si hay un curso para editar, cargar sus datos al montar
+  useEffect(() => {
+    if (courseToEdit) {
+      setFormData({
+        title: courseToEdit.title || '',
+        description: courseToEdit.description || '',
+        instructor: courseToEdit.instructor || '',
+        duration: courseToEdit.duration || '',
+        price: courseToEdit.price || '',
+        category: courseToEdit.category || '',
+        is_active: courseToEdit.is_active ?? true
+      });
+      setMessage('');
+      setMessageType('');
+      setErrors({});
+    }
+  }, [courseToEdit]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    setErrors(prev => ({ ...prev, [name]: '' })); // limpia error al cambiar
+    setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const validate = () => {
     const newErrors = {};
-
     if (!formData.title.trim()) newErrors.title = 'El título es obligatorio';
     if (!formData.description.trim()) newErrors.description = 'La descripción es obligatoria';
     if (!formData.instructor.trim()) newErrors.instructor = 'El instructor es obligatorio';
@@ -40,9 +57,7 @@ const CourseForm = ({ onCourseCreated }) => {
     if (!formData.price) newErrors.price = 'El precio es obligatorio';
     else if (isNaN(formData.price) || parseFloat(formData.price) < 0)
       newErrors.price = 'El precio debe ser un número válido';
-
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
@@ -54,32 +69,48 @@ const CourseForm = ({ onCourseCreated }) => {
     if (!validate()) return;
 
     setLoading(true);
-
     try {
-      const result = await courseService.createCourse({
-        ...formData,
-        duration: parseInt(formData.duration),
-        price: parseFloat(formData.price)
-      });
-
-      if (result.success) {
-        setMessage('Curso creado exitosamente!');
-        setMessageType('success');
-        setFormData({
-          title: '',
-          description: '',
-          instructor: '',
-          duration: '',
-          price: '',
-          category: '',
-          is_active: true
+      let result;
+      if (courseToEdit && courseToEdit.id) {
+        // Editar curso existente
+        result = await courseService.updateCourse(courseToEdit.id, {
+          ...formData,
+          duration: parseInt(formData.duration),
+          price: parseFloat(formData.price)
         });
-        setErrors({});
-        if (onCourseCreated) onCourseCreated();
+        if (result.success) {
+          setMessage('Curso actualizado exitosamente!');
+          setMessageType('success');
+        } else {
+          setMessage('Error al actualizar el curso: ' + result.error);
+          setMessageType('error');
+        }
       } else {
-        setMessage('Error al crear el curso: ' + result.error);
-        setMessageType('error');
+        // Crear nuevo curso
+        result = await courseService.createCourse({
+          ...formData,
+          duration: parseInt(formData.duration),
+          price: parseFloat(formData.price)
+        });
+        if (result.success) {
+          setMessage('Curso creado exitosamente!');
+          setMessageType('success');
+          setFormData({
+            title: '',
+            description: '',
+            instructor: '',
+            duration: '',
+            price: '',
+            category: '',
+            is_active: true
+          });
+        } else {
+          setMessage('Error al crear el curso: ' + result.error);
+          setMessageType('error');
+        }
       }
+
+      if (result.success && onCourseSaved) onCourseSaved();
     } catch (error) {
       setMessage('Error al conectar con el backend');
       setMessageType('error');
@@ -90,9 +121,9 @@ const CourseForm = ({ onCourseCreated }) => {
 
   return (
     <div className="course-form">
-      <h2>Crear Nuevo Curso</h2>
+      <h2>{courseToEdit ? 'Editar Curso' : 'Crear Nuevo Curso'}</h2>
       <p className="subtitle">
-        Completa la información requerida para agregar un nuevo curso al catálogo
+        Completa la información requerida {courseToEdit ? 'para actualizar el curso' : 'para agregar un nuevo curso'}
       </p>
       
       <form onSubmit={handleSubmit}>
@@ -106,6 +137,7 @@ const CourseForm = ({ onCourseCreated }) => {
             value={formData.title} 
             onChange={handleChange} 
             placeholder="Introduce el título del curso" 
+            className={errors.title ? 'error' : ''}
           />
           {errors.title && <span className="error">{errors.title}</span>}
         </div>
@@ -119,6 +151,7 @@ const CourseForm = ({ onCourseCreated }) => {
             value={formData.description} 
             onChange={handleChange} 
             placeholder="Describe el contenido y los objetivos del curso" 
+            className={errors.description ? 'error' : ''}
           />
           {errors.description && <span className="error">{errors.description}</span>}
         </div>
@@ -134,6 +167,7 @@ const CourseForm = ({ onCourseCreated }) => {
               value={formData.instructor} 
               onChange={handleChange} 
               placeholder="Nombre del instructor" 
+              className={errors.instructor ? 'error' : ''}
             />
             {errors.instructor && <span className="error">{errors.instructor}</span>}
           </div>
@@ -148,6 +182,7 @@ const CourseForm = ({ onCourseCreated }) => {
               value={formData.category} 
               onChange={handleChange} 
               placeholder="Categoría del curso" 
+              className={errors.category ? 'error' : ''}
             />
             {errors.category && <span className="error">{errors.category}</span>}
           </div>
@@ -164,6 +199,7 @@ const CourseForm = ({ onCourseCreated }) => {
               value={formData.duration} 
               onChange={handleChange} 
               placeholder="Ej: 20" 
+              className={errors.duration ? 'error' : ''}
             />
             {errors.duration && <span className="error">{errors.duration}</span>}
           </div>
@@ -178,6 +214,7 @@ const CourseForm = ({ onCourseCreated }) => {
               value={formData.price} 
               onChange={handleChange} 
               placeholder="Ej: 49.99" 
+              className={errors.price ? 'error' : ''}
             />
             {errors.price && <span className="error">{errors.price}</span>}
           </div>
@@ -199,7 +236,7 @@ const CourseForm = ({ onCourseCreated }) => {
         
         {/* Botón */}
         <button type="submit" disabled={loading}>
-          {loading ? 'Creando...' : 'Crear Curso'}
+          {loading ? (courseToEdit ? 'Actualizando...' : 'Creando...') : (courseToEdit ? 'Actualizar Curso' : 'Crear Curso')}
         </button>
         
         {/* Mensaje general */}

@@ -60,6 +60,29 @@ app.delete("/api/courses/:id", async (req, res) => {
   }
 });
 
+// Editar un curso por ID
+app.put("/api/courses/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title, description, instructor, duration, price, category, is_active } = req.body;
+
+  try {
+    // Verificar si el curso existe
+    const [course] = await db.execute("SELECT * FROM courses WHERE id = ?", [id]);
+    if (!course.length) return res.status(404).json({ error: "Curso no encontrado" });
+
+    // Actualizar curso
+    await db.execute(
+      "UPDATE courses SET title = ?, description = ?, instructor = ?, duration = ?, price = ?, category = ?, is_active = ? WHERE id = ?",
+      [title, description, instructor, duration, price, category, is_active, id]
+    );
+
+    res.json({ id, title, description, instructor, duration, price, category, is_active });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 
 app.listen(3000, () => console.log("Backend running on http://localhost:3000"));
