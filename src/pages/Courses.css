@@ -1,0 +1,196 @@
+/* Contenedor principal ocupa toda la pantalla */
+.courses-page {
+  min-height: 100vh;
+  width: 100%;  /* Cambié de 100vw a 100% para evitar scroll horizontal */
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  font-family: "Inter", sans-serif;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* Header */
+.courses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.courses-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0; /* Eliminar margen por defecto */
+}
+
+.courses-header button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #2563eb;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.courses-header button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* Contenedor principal: formulario + lista ocupa toda la pantalla restante */
+.courses-main {
+  flex: 1;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 0; /* Importante para que el flex funcione correctamente */
+}
+
+/* Formulario a la izquierda */
+.courses-form {
+  flex: 0 0 400px; /* ancho fijo de 400px */
+  height: fit-content; /* Altura según contenido */
+  max-height: calc(100vh - 200px); /* Altura máxima respetando el header */
+  overflow-y: auto; /* scroll interno si hay muchos campos */
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  animation: fadeInDown 0.3s ease;
+  position: sticky; /* Para que se mantenga en posición al hacer scroll */
+  top: 1rem;
+}
+
+/* Título del formulario */
+.courses-form h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+/* Lista de cursos a la derecha */
+.courses-list {
+  flex: 1; /* ocupa todo el espacio restante */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-content: start; /* Alinea el contenido al inicio */
+  min-width: 0; /* Permite que el grid se reduzca */
+  box-sizing: border-box;
+}
+
+/* Responsivo: más columnas en pantallas grandes */
+@media (min-width: 768px) {
+  .courses-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .courses-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Responsivo: apilar formulario y lista en móviles */
+@media (max-width: 768px) {
+  .courses-main {
+    flex-direction: column; /* Apilar verticalmente */
+    gap: 1rem;
+  }
+  
+  .courses-form {
+    flex: none;
+    position: static; /* No sticky en móviles */
+    max-height: none;
+  }
+  
+  .courses-list {
+    grid-template-columns: 1fr; /* Una sola columna en móviles */
+  }
+}
+
+/* Animación formulario */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estados de carga, error y vacío */
+.courses-loading {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #666;
+}
+
+.courses-error {
+  grid-column: 1 / -1;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.courses-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.courses-empty h3 {
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+/* Animación de carga (spinner) */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.courses-page {
+  position: relative;
+  min-height: 100vh;
+  width: 100vw; /* Ocupa todo el ancho visible */
+  padding: 1rem;
+
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
+    url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  font-family: "Inter", sans-serif;
+}
