@@ -81,7 +81,7 @@ const Courses = () => {
           ) : error ? (
             <p>Error: {error}</p>
           ) : courses.length === 0 ? (
-            <p>No hay cursos disponibles</p>
+            <p>No hay cursos disponibles en este momento</p>
           ) : (
             courses.map(course => (
               <CourseCard
