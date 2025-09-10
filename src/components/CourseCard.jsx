@@ -52,11 +52,11 @@ const CourseCard = ({ course, onEdit, onDelete }) => {
       {/* Botones: solo Editar y Eliminar */}
       <div className="course-actions">
         <button onClick={() => onEdit(id)} className="btn btn-secondary">
-          Editar
+          <Mover></Mover>
         </button>
 
         <button onClick={() => onDelete(id)} className="btn btn-danger">
-          Eliminar
+          ELIMINar Curso
         </button>
       </div>
     </div>
